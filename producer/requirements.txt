@@ -1,0 +1,15 @@
+confluent-kafka[avro]==2.3.0
+avro==1.11.3
+fastavro==1.12.1
+requests
+urllib3
+attrs
+six
+certifi
+cffi
+httpx
+cachetools
+authlib
+python-dateutil
+idna
+charset-normalizer
