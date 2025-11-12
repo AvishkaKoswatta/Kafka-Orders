@@ -7,22 +7,24 @@ from confluent_kafka.schema_registry.avro import AvroSerializer
 from confluent_kafka.serialization import StringSerializer
 
 # Schema Registry configuration
-schema_registry_conf = {'url': 'http://schema-registry:8081'}
-schema_registry_client = SchemaRegistryClient(schema_registry_conf)
+schema_registry_conf = {'url': 'http://schema-registry:8081'} # find schema registry client at this url
+schema_registry_client = SchemaRegistryClient(schema_registry_conf) # create a client object from library
 
 # Load Avro schema
 schema_path = "./orders.avsc"
-value_schema_str = open(schema_path).read()
+value_schema_str = open(schema_path).read() # reads schema file contents into a variable as a string
 
 # Define the Avro serializer for the message value
 value_avro_serializer = AvroSerializer(schema_registry_client, value_schema_str)
 
+#A serializer converts Python object (like a dictionary) into a byte stream (binary data) that Kafka can transmit.
+
 # Define the String serializer for the message key
-key_serializer = StringSerializer("utf_8")
+key_serializer = StringSerializer("utf_8") # key in key , value encoded using utf-8
 
 producer_conf = {
-    'bootstrap.servers': 'kafka:9092',
-    'key.serializer': key_serializer,
+    'bootstrap.servers': 'kafka:9092', # find kafka broker at this url
+    'key.serializer': key_serializer, 
     'value.serializer': value_avro_serializer,
 }
 
@@ -51,4 +53,4 @@ while True:
     )
     producer.flush()
     print(f"Produced: {order}")
-    time.sleep(2)
+    time.sleep(60)

@@ -34,7 +34,7 @@ with open(schema_path) as f:
 consumer_conf = {
     'bootstrap.servers': KAFKA_BROKER,
     'group.id': 'order-consumer-group',
-    'auto.offset.reset': 'earliest',
+    'auto.offset.reset': 'latest',
     'key.deserializer': lambda k, ctx: k.decode() if k else None,
     'value.deserializer': AvroDeserializer(schema_registry_client, value_schema_str)
 }
@@ -57,7 +57,7 @@ total_count = 0
 def process_message(msg):
     global total_price, total_count
     try:
-        order = msg.value()
+        order = msg.value() # AvroDeserializer converts Avro → Python dict
         if order["price"] < 0:
             raise ValueError("Price cannot be negative")
         total_price += order["price"]
