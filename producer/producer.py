@@ -47,8 +47,8 @@ while True:
 
     producer.produce(
         topic="orders",
-        key=order["orderId"],     # this will now be handled correctly
-        value=order,              # Avro serialized
+        key=order["orderId"],      
+        value=order, # Avro serialized
         on_delivery=delivery_report
     )
     producer.flush()
