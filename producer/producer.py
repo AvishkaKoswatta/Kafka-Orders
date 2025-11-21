@@ -9,7 +9,7 @@ from confluent_kafka.serialization import StringSerializer
 
 SCHEMA_REGISTRY_URL = "http://schema-registry:8081"
 
-# Wait for Schema Registry
+#wait for schema registry
 for i in range(60):
     try:
         res = requests.get(f"{SCHEMA_REGISTRY_URL}/subjects")

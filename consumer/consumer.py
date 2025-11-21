@@ -8,7 +8,7 @@ from confluent_kafka.schema_registry.avro import AvroDeserializer, AvroSerialize
 KAFKA_BROKER = "kafka:9092"
 SCHEMA_REGISTRY_URL = os.getenv("SCHEMA_REGISTRY_URL") or "http://schema-registry:8081"
 
-# Wait for Schema Registry to be ready
+#wait for Schema Registry to be ready
 for i in range(30):
     try:
         res = requests.get(f"{SCHEMA_REGISTRY_URL}/subjects")
@@ -21,16 +21,16 @@ for i in range(30):
 else:
     raise Exception("Schema Registry not reachable after 60 seconds")
 
-# Initialize Schema Registry client
+#initialize Schema Registry client
 schema_registry_conf = {'url': SCHEMA_REGISTRY_URL}
 schema_registry_client = SchemaRegistryClient(schema_registry_conf)
 
-# Load Avro schema
+
 schema_path = "./orders.avsc"
 with open(schema_path) as f:
     value_schema_str = f.read()
 
-# Consumer config
+
 consumer_conf = {
     'bootstrap.servers': KAFKA_BROKER,
     'group.id': 'order-consumer-group-2',
@@ -43,7 +43,7 @@ consumer = DeserializingConsumer(consumer_conf)
 consumer.subscribe(["orders"])
 print("Subscribed to topic: orders", flush=True)
 
-# DLQ producer config using SerializingProducer (non-deprecated)
+#DLQ producer config using Serializing Producer  
 dlq_producer_conf = {
     'bootstrap.servers': KAFKA_BROKER,
     'key.serializer': str.encode,
@@ -51,14 +51,14 @@ dlq_producer_conf = {
 }
 dlq_producer = SerializingProducer(dlq_producer_conf)
 
-# Aggregation state
+#Aggregation state
 total_price = 0
 total_count = 0
 
 def process_message(msg):
     global total_price, total_count
     try:
-        order = msg.value() # AvroDeserializer converts Avro → Python dict
+        order = msg.value() # AvroDeserializer converts Avro to python dict
         if order["price"] < 0:
             raise ValueError("Price cannot be negative")
         total_price += order["price"]
