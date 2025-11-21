@@ -1,3 +1,59 @@
+# version: "3.8"
+
+# services:
+#   zookeeper:
+#     image: confluentinc/cp-zookeeper:7.7.0
+#     environment:
+#       ZOOKEEPER_CLIENT_PORT: 2181
+#       ZOOKEEPER_TICK_TIME: 2000
+
+#   kafka:
+#     image: confluentinc/cp-kafka:7.7.0
+#     depends_on:
+#       - zookeeper
+#     ports:
+#       - "29092:29092"
+#     environment:
+#       KAFKA_BROKER_ID: 1
+#       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+#       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+#       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+#       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+#   schema-registry:
+#     image: confluentinc/cp-schema-registry:7.7.0
+#     depends_on:
+#       - kafka
+#     ports:
+#       - "8081:8081"
+#     environment:
+#       SCHEMA_REGISTRY_HOST_NAME: schema-registry
+#       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+
+#   producer:
+#     build: ./producer
+#     depends_on:
+#       - kafka
+#       - schema-registry
+#     environment:
+#       BOOTSTRAP_SERVERS: kafka:9092
+#       SCHEMA_REGISTRY_URL: http://schema-registry:8081
+
+#   consumer:
+#     build: ./consumer
+#     depends_on:
+#       - kafka
+#       - schema-registry
+#     environment:
+#       BOOTSTRAP_SERVERS: kafka:9092
+#       SCHEMA_REGISTRY_URL: http://schema-registry:8081
+#     command: ["bash", "-c", "sleep 60 && python consumer.py"]
+
+
+
 version: "3.8"
 
 services:
@@ -6,6 +62,9 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-data:/var/lib/zookeeper/log
 
   kafka:
     image: confluentinc/cp-kafka:7.7.0
@@ -16,11 +75,20 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+      # remove this, create topics manually instead
+      # KAFKA_CREATE_TOPICS: "orders:1:1"
+
+    volumes:
+      - kafka-data:/var/lib/kafka/data
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.7.0
@@ -49,4 +117,8 @@ services:
     environment:
       BOOTSTRAP_SERVERS: kafka:9092
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
-    command: ["bash", "-c", "sleep 60 && python consumer.py"]
+    command: ["bash", "-c", "sleep 120 && python consumer.py"]
+
+volumes:
+  zookeeper-data:
+  kafka-data:

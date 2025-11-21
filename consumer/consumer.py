@@ -33,14 +33,15 @@ with open(schema_path) as f:
 # Consumer config
 consumer_conf = {
     'bootstrap.servers': KAFKA_BROKER,
-    'group.id': 'order-consumer-group',
-    'auto.offset.reset': 'latest',
+    'group.id': 'order-consumer-group-2',
+    'auto.offset.reset': 'earliest',
     'key.deserializer': lambda k, ctx: k.decode() if k else None,
     'value.deserializer': AvroDeserializer(schema_registry_client, value_schema_str)
 }
 
 consumer = DeserializingConsumer(consumer_conf)
 consumer.subscribe(["orders"])
+print("Subscribed to topic: orders", flush=True)
 
 # DLQ producer config using SerializingProducer (non-deprecated)
 dlq_producer_conf = {
